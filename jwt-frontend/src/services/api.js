@@ -26,17 +26,20 @@ api.interceptors.response.use(
     }
     return response;
   },
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
     if (error.response.status === 401) {
       localStorage.clear();
-      api
-        .post("refresh")
-        .then(function (response) {
-          localStorage.setItem("access", response.data.access_token);
-        })
-        .catch(function (error) {
-          window.location.href = MAIN_URL;
-        });
+      const res = await api.post("refresh");
+      console.log(res);
+      if (res.status === 200) {
+        localStorage.setItem("access", res.data.access_token);
+        apiSetHeader("Bearer", `${localStorage.getItem("access")}`);
+        originalRequest.headers.Bearer = localStorage.getItem("access")
+        return api.request(originalRequest);
+      } else {
+        window.location.href = MAIN_URL;
+      }
     }
     return Promise.reject(error);
   }

@@ -17,28 +17,6 @@ import UserPage from './pages/UserPage';
 
 function App() {
 
-  const navigate = useNavigate();
-  const [userInfo, setUserInfo] = useState("")
-  useEffect(() => {
-    getUserInfo();
-  }, []);
-
-  async function getUserInfo() {
-    try{
-      if (localStorage.getItem("access") !== null) {
-        apiSetHeader("Bearer", `${localStorage.getItem("access")}`);
-        const res = await api.get("user_info");
-        setUserInfo(res.data.user);
-        navigate('/');
-      } else {
-        navigate("/login");
-      }
-    } catch (e) {
-      navigate("/login");
-    }
-  }
-
-
   return (
     <ChakraProvider theme={theme}>
       <Box textAlign="center" fontSize="xl">
@@ -46,7 +24,7 @@ function App() {
           <ColorModeSwitcher justifySelf="flex-end" />
           <VStack spacing={8}>
             <Routes>
-              <Route path="/" element={<UserPage userInfo={userInfo}/>}></Route>
+              <Route path="/" element={<UserPage/>}></Route>
               <Route path="/login" element={<Auth/>}></Route>
               <Route path="/register" element={<Reg/>}></Route>
             </Routes>
