@@ -19,7 +19,8 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=['*'],
+    allow_origins=[r'http://127.0.0.1', r'http://localhost'],
+    allow_origin_regex=r'http://127.0.0.1:\d*',
     allow_methods=['*'],
     allow_headers=['*']
 )
@@ -28,9 +29,6 @@ app.add_middleware(
 def on_startup():
     create_db_and_tables()
     
-    
-
-        
 
 @app.post('/register')
 def register_user(
@@ -75,10 +73,6 @@ def refresh_token(
     return response
     
     
-    
-    
-    
-    
 @app.post('/login')
 def login_user(
         login_form : api.LoginModel,
@@ -113,13 +107,12 @@ def login_user(
             "access_token": access_token
         }
     )
-    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True)
+    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, max_age=600)
     return response
 
 
 @app.get('/user_info')
 def get_user_info(
-        session: Session = Depends(get_session),
         user: db.User = Depends(get_user)
     ):
     

@@ -89,7 +89,9 @@ def get_user(bearer:  Annotated[str, Header()], session: Session = Depends(get_s
     return user
 
 
-def get_refresh_user(refresh_token: Annotated[str | None, Cookie()], session: Session = Depends(get_session)):
+def get_refresh_user(
+        refresh_token: Annotated[str | None, Cookie()]
+    ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -111,13 +113,15 @@ def get_refresh_user(refresh_token: Annotated[str | None, Cookie()], session: Se
     except JWTError:
         raise credentials_exception
     
-
-    user = get_user_by_username(session, username=username)
+    with Session(engine) as session:
+        user = get_user_by_username(session, username=username)
+        
     print("Refresh old:" + user.refresh_token)
     print("Refresh new:" + refresh_token)
     
-    
     if user is None or user.refresh_token != refresh_token:
         raise credentials_exception
-        
+    
+    session.close()
+            
     return user
